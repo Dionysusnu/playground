@@ -1,11 +1,9 @@
-const worker = new Worker("bundle.js");
-
-const CORE_LIB_BASE = "https://cdn.jsdelivr.net/npm/@rbxts/types@latest";
-const CORE_LIB_PATH = `${CORE_LIB_BASE}/include/`;
-
-const loaded = new Set();
-
 const PATH_SEP = "/";
+const JS_DELIVR = "https://cdn.jsdelivr.net/npm/@rbxts";
+const PATH_REFERENCE_REGEX = /^\/\/\/ <reference path="([^"]+)" \/>\s*$/gm;
+
+const worker = new Worker("bundle.js");
+const loaded = new Set();
 
 function pathJoin(...parts) {
 	let result = parts[0];
@@ -21,20 +19,16 @@ function pathJoin(...parts) {
 function pathResolve(path) {
 	const pathParts = path.split(PATH_SEP);
 	const result = [];
-	for (let i = 0; i < pathParts.length; i++) {
-		if (pathParts[i] === ".") continue;
-		if (pathParts[i] === "..") {
+	for (const part of pathParts) {
+		if (part === ".") continue;
+		if (part === "..") {
 			result.pop();
 			continue;
 		}
-		result.push(pathParts[i]);
+		result.push(part);
 	}
 	return result.join(PATH_SEP);
 }
-
-const JS_DELIVR = "https://cdn.jsdelivr.net/npm/@rbxts";
-
-const PATH_REFERENCE_REGEX = /^\/\/\/ <reference path="([^"]+)" \/>\s*$/gm;
 
 function getMatches(regex, str) {
 	const result = [];
